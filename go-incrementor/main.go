@@ -6,10 +6,12 @@ type Incrementor struct {
 	count int
 }
 
-func (self Incrementor) currentValue() int {
+func (self Incrementor) getCurrentValue() int {
 	return self.count
 }
 func (self *Incrementor) increment() {
+	// Points to the "counter" variable
+	// So it increments this particular variable(instance) sent.
 	self.count++
 }
 
@@ -18,5 +20,5 @@ func main() {
 	counter.increment()
 	counter.increment()
 
-	fmt.Printf("current value %d\n", counter.currentValue())
+	fmt.Printf("current value %d\n", counter.getCurrentValue())
 }
