@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"gitlab.com/andiemen/go-algo-plg/gridTravler"
 )
 
 func main() {
