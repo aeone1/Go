@@ -6,10 +6,10 @@ import (
 
 func main() {
 	//fmt.Println(fib(6))
-	//fmt.Println(fib(7))
+	fmt.Println(fib(7))
 	//fmt.Println(fib(50))
 	
-	//fmt.Println(fibMem(7, make(map[int]int, 0)))
+	fmt.Println(fibMem(7, make(map[int]int)))
 	
 }
 
