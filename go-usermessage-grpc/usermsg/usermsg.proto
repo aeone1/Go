@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package usermsg;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/aeone1/Go/tree/master/go-usermessage-grpc;go_usermessage_grpc";
+
+service UserMessage {
+  rpc CreateNewMessage (NewMessage) returns (Message);
+}
+
+message NewMessage {
+  uint64 user_id = 1;
+  google.protobuf.Timestamp timestamp = 3;
+  message message_data {
+    string data = 1;
+    message content {};
+  };
+}
+
+message Message {
+  bytes id = 1;
+  uint64 user_id = 2;
+  google.protobuf.Timestamp timestamp = 3;
+  message message_data {
+    bytes id = 1;
+    string data = 2;
+    message content {};
+  };
+}
