@@ -40,10 +40,16 @@ func (s *UserMessageServer) CreateNewMessage(ctx context.Context, in *pb.NewMess
 	log.Printf("Recieved: %v, %v", in.GetUserId(), in)
 	//message_id := []byte(RandStringBytesMaskImprSrcSB(15).Output)
 	message_id := uuid.New().String()
+	created_message_data := &pb.MessageData{
+		Id: uuid.New().String(),
+		Data: in.GetMessageData().Data,
+		Content: in.GetMessageData().Content,
+	}
 	created_message := &pb.Message{
 		Id: message_id,
 		UserId: in.GetUserId(),
 		Ts: in.GetTs(),
+		MessageData: created_message_data,
 	}
 	s.message_list.Messages = append(s.message_list.Messages, created_message)
 	return created_message, nil

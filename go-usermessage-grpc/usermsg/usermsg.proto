@@ -13,11 +13,8 @@ service UserMessage {
 
 message NewMessage {
   uint64 user_id = 1;
-  google.protobuf.Timestamp ts = 3;
-  message message_data {
-    string data = 1;
-    message content {};
-  };
+  google.protobuf.Timestamp ts = 2;
+  NewMessageData message_data = 3;
 }
 
 message Message {
@@ -27,14 +24,16 @@ message Message {
   MessageData message_data = 4;
 }
 
+
+message NewMessageData {
+  string data = 1;
+  map<string, string> content = 2;
+}
+
 message MessageData {
   string id = 1;
   string data = 2;
-  Content content = 3;
-}
-
-message Content {
-
+  map<string, string> content = 3;
 }
 
 message GetMessageParams {

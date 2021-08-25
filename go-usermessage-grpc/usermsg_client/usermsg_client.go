@@ -32,17 +32,31 @@ func main() {
 	defer cancel()
 
 	//first_message := Message{ 1213434, timestamppb.Now()}
-	second_message := Message{ 1313674, timestamppb.New(time.Now())}
+
+
+	second_message := Message{ 1314674, timestamppb.New(time.Now())}
+	second_message_data_content := make(map[string]string)
+	second_message_data_content["H"] = "Hello"
+	second_message_data_content["W"] = "WO~RLD"
+	second_message_data := &pb.NewMessageData{
+		Data: "hello world",
+		Content: second_message_data_content,
+	}
 	//third_message := pb.Message{ UserId: 243534, }
 
-	r, err := c.CreateNewMessage(ctx, &pb.NewMessage{UserId: second_message.user_id, Ts: second_message.ts})
+	r, err := c.CreateNewMessage(ctx, &pb.NewMessage{
+		UserId: second_message.user_id, 
+		Ts: second_message.ts, 
+		MessageData: second_message_data,
+	})
 	if err != nil {
 		log.Fatalf("could not create usermessage: %v", err)
 	}
 	log.Printf(`UserMessage:
 	Id: %v
 	UserId: %v
-	Ts: %v`, r.GetId(), r.GetUserId(), r.GetTs())
+	Ts: %v
+	MessageData: %v`, r.GetId(), r.GetUserId(), r.GetTs(), r.GetMessageData())
 	params := &pb.GetMessageParams{}
 	rec, err := c.GetMessages(ctx, params)
 	if err != nil {
