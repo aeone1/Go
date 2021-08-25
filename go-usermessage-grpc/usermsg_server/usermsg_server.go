@@ -4,24 +4,30 @@ import (
 	"context"
 	"log"
 	"net"
+	"os"
+	"io/ioutil"
 
 	pb "github.com/aeone1/Go/tree/master/go-usermessage-grpc/usermsg"
 	"google.golang.org/grpc"
 	"github.com/google/uuid"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
+/*
+TODO: Error handling func and error messages (grpcError)
+*/
+
 const (
-	port = ":5051"
+	port = ":50515"
+	fileName = "user_message.json"
 )
 
 func NewUserMessageServer() *UserMessageServer {
 	return &UserMessageServer{
-		message_list: &pb.MessageList{},
 	}
 }
 type UserMessageServer struct {
 	pb.UnimplementedUserMessageServer
-	message_list *pb.MessageList
 }
 
 func (server *UserMessageServer) Run() error {
@@ -36,9 +42,25 @@ func (server *UserMessageServer) Run() error {
 	return s.Serve(lis)
 }
 
-func (s *UserMessageServer) CreateNewMessage(ctx context.Context, in *pb.NewMessage) (*pb.Message, error) {
-	log.Printf("Recieved: %v, %v", in.GetUserId(), in)
-	//message_id := []byte(RandStringBytesMaskImprSrcSB(15).Output)
+func WriteToFile (m *pb.MessageList, fileName string) (string, error) {
+	jsonBytes, err := protojson.Marshal(m)
+	if err != nil {
+		return "Json Marshaling failed: %v", err
+	}
+	if err := ioutil.WriteFile(fileName, jsonBytes, 0664); err != nil {
+		return "Failed write to file: %v", err
+	}
+	return "", nil
+}
+
+func (s *UserMessageServer) CreateNewMessage(
+	ctx context.Context, 
+	in *pb.NewMessage,
+	) (*pb.Message, error) {
+	log.Printf("Recieved: %v", in)
+	// check file exist by reading it
+	readBytes, err := ioutil.ReadFile(fileName)
+	message_list := &pb.MessageList{}
 	message_id := uuid.New().String()
 	created_message_data := &pb.MessageData{
 		Id: uuid.New().String(),
@@ -51,12 +73,41 @@ func (s *UserMessageServer) CreateNewMessage(ctx context.Context, in *pb.NewMess
 		Ts: in.GetTs(),
 		MessageData: created_message_data,
 	}
-	s.message_list.Messages = append(s.message_list.Messages, created_message)
+	if err != nil {
+		if os.IsNotExist(err) {
+			log.Print("File not found. Creating a new file")
+			message_list.Messages = append(message_list.Messages, created_message)
+			if errMsg, err := WriteToFile(message_list, fileName); err != nil {
+				log.Fatalf(errMsg, err)
+			}
+			return created_message, nil
+		}
+		log.Fatalf("Error reading file: %v", err)
+	}
+
+	if err := protojson.Unmarshal(readBytes, message_list); err != nil {
+		log.Fatalf("Failed to pass message list: %v", err)
+	}
+	message_list.Messages = append(message_list.Messages, created_message)
+	if errMsg, err := WriteToFile(message_list, fileName); err != nil {
+		log.Fatalf(errMsg, err)
+	}
 	return created_message, nil
 }
 
-func (s *UserMessageServer) GetMessages(ctx context.Context, in *pb.GetMessageParams) (*pb.MessageList, error) {
-	return s.message_list, nil
+func (s *UserMessageServer) GetMessages(
+	ctx context.Context, 
+	in *pb.GetMessageParams,
+	) (*pb.MessageList, error) {
+	jsonBytes, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		log.Fatalf("Failed to read from file: %v", err)
+	}
+	message_list := &pb.MessageList{}
+	if err := protojson.Unmarshal(jsonBytes, message_list); err != nil {
+		log.Fatalf("Failed to Unmarshal: %v", err)
+	}
+	return message_list, nil
 }
 
 func main() {
