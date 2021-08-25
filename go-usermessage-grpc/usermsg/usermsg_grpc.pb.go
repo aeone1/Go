@@ -19,6 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserMessageClient interface {
 	CreateNewMessage(ctx context.Context, in *NewMessage, opts ...grpc.CallOption) (*Message, error)
+	GetMessages(ctx context.Context, in *GetMessageParams, opts ...grpc.CallOption) (*MessageList, error)
 }
 
 type userMessageClient struct {
@@ -38,11 +39,21 @@ func (c *userMessageClient) CreateNewMessage(ctx context.Context, in *NewMessage
 	return out, nil
 }
 
+func (c *userMessageClient) GetMessages(ctx context.Context, in *GetMessageParams, opts ...grpc.CallOption) (*MessageList, error) {
+	out := new(MessageList)
+	err := c.cc.Invoke(ctx, "/usermsg.UserMessage/GetMessages", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserMessageServer is the server API for UserMessage service.
 // All implementations must embed UnimplementedUserMessageServer
 // for forward compatibility
 type UserMessageServer interface {
 	CreateNewMessage(context.Context, *NewMessage) (*Message, error)
+	GetMessages(context.Context, *GetMessageParams) (*MessageList, error)
 	mustEmbedUnimplementedUserMessageServer()
 }
 
@@ -52,6 +63,9 @@ type UnimplementedUserMessageServer struct {
 
 func (UnimplementedUserMessageServer) CreateNewMessage(context.Context, *NewMessage) (*Message, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateNewMessage not implemented")
+}
+func (UnimplementedUserMessageServer) GetMessages(context.Context, *GetMessageParams) (*MessageList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMessages not implemented")
 }
 func (UnimplementedUserMessageServer) mustEmbedUnimplementedUserMessageServer() {}
 
@@ -84,6 +98,24 @@ func _UserMessage_CreateNewMessage_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserMessage_GetMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMessageParams)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserMessageServer).GetMessages(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/usermsg.UserMessage/GetMessages",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserMessageServer).GetMessages(ctx, req.(*GetMessageParams))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserMessage_ServiceDesc is the grpc.ServiceDesc for UserMessage service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -94,6 +126,10 @@ var UserMessage_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateNewMessage",
 			Handler:    _UserMessage_CreateNewMessage_Handler,
+		},
+		{
+			MethodName: "GetMessages",
+			Handler:    _UserMessage_GetMessages_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

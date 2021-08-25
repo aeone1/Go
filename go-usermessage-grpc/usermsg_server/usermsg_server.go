@@ -1,34 +1,61 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"log"
-	"math/rand"
 	"net"
 
 	pb "github.com/aeone1/Go/tree/master/go-usermessage-grpc/usermsg"
 	"google.golang.org/grpc"
+	"github.com/google/uuid"
 )
 
 const (
-	port = "5051"
+	port = ":5051"
 )
 
+func NewUserMessageServer() *UserMessageServer {
+	return &UserMessageServer{
+		message_list: &pb.MessageList{},
+	}
+}
 type UserMessageServer struct {
 	pb.UnimplementedUserMessageServer
+	message_list *pb.MessageList
 }
 
-func (s *UserMessageServer) CreateMessage(ctx context.Context, in *pb.NewMessage) (*pb.Message, error) {
-	log.Printf("Recieved: %v", in.GetUserId())
-	message_id := []byte("Ju53nsdiu53nJH")
-	return &pb.Message{
+func (server *UserMessageServer) Run() error {
+	lis, err := net.Listen("tcp", port)
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+
+	s := grpc.NewServer()
+	pb.RegisterUserMessageServer(s, server)
+	log.Printf("server listening at %v", lis.Addr())
+	return s.Serve(lis)
+}
+
+func (s *UserMessageServer) CreateNewMessage(ctx context.Context, in *pb.NewMessage) (*pb.Message, error) {
+	log.Printf("Recieved: %v, %v", in.GetUserId(), in)
+	//message_id := []byte(RandStringBytesMaskImprSrcSB(15).Output)
+	message_id := uuid.New().String()
+	created_message := &pb.Message{
 		Id: message_id,
 		UserId: in.GetUserId(),
-		Timestamp: ,
-	}, nil
+		Ts: in.GetTs(),
+	}
+	s.message_list.Messages = append(s.message_list.Messages, created_message)
+	return created_message, nil
 }
 
-func main(){
-	
+func (s *UserMessageServer) GetMessages(ctx context.Context, in *pb.GetMessageParams) (*pb.MessageList, error) {
+	return s.message_list, nil
+}
+
+func main() {
+	user_msg_server := NewUserMessageServer()
+	if err := user_msg_server.Run(); err != nil {
+		log.Fatalf("failed to run server: %v", err)
+	}
 }

@@ -8,6 +8,7 @@ option go_package = "github.com/aeone1/Go/tree/master/go-usermessage-grpc;go_use
 
 service UserMessage {
   rpc CreateNewMessage (NewMessage) returns (Message);
+  rpc GetMessages (GetMessageParams) returns (MessageList);
 }
 
 message NewMessage {
@@ -20,12 +21,26 @@ message NewMessage {
 }
 
 message Message {
-  bytes id = 1;
+  string id = 1;
   uint64 user_id = 2;
   google.protobuf.Timestamp ts = 3;
-  message message_data {
-    bytes id = 1;
-    string data = 2;
-    message content {};
-  };
+  MessageData message_data = 4;
+}
+
+message MessageData {
+  string id = 1;
+  string data = 2;
+  Content content = 3;
+}
+
+message Content {
+
+}
+
+message GetMessageParams {
+
+}
+
+message MessageList {
+  repeated Message messages = 1; // repeated used when returning reoccuring obj in a list.
 }
