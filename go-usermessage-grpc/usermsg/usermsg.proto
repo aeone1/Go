@@ -3,12 +3,17 @@ syntax = "proto3";
 package usermsg;
 
 import "google/protobuf/timestamp.proto";
+// import "google/api/annotations.proto"; //needs to be fixed to enable api
 
 option go_package = "github.com/aeone1/Go/tree/master/go-usermessage-grpc;go_usermessage_grpc";
 
 service UserMessage {
   rpc CreateNewMessage (NewMessage) returns (Message);
-  rpc GetMessages (GetMessageParams) returns (MessageList);
+  rpc GetMessages (GetMessageParams) returns (MessageList) {
+    // option (google.api.http) = {
+    //   post: "/v1/example/echo/{id}/{msg}"
+    // };
+  };
 }
 
 message NewMessage {
