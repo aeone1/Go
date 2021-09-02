@@ -17,7 +17,7 @@ const (
 
 type Message struct {
 	user_id uint64
-	ts *timestamp.Timestamp
+	ts      *timestamp.Timestamp
 }
 
 func main() {
@@ -31,19 +31,19 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	message := Message{ 1314674, timestamppb.New(time.Now())}
+	message := Message{1314674, timestamppb.New(time.Now())}
 	message_data_content := make(map[string]string)
 	message_data_content["H"] = "Hello"
 	message_data_content["W"] = "WORLD"
 	message_data := &pb.NewMessageData{
-		Data: "hello world",
+		Data:    "hello world",
 		Content: message_data_content,
 	}
 	//third_message := pb.Message{ UserId: 243534, }
 
 	r, err := c.CreateNewMessage(ctx, &pb.NewMessage{
-		UserId: message.user_id, 
-		Ts: message.ts, 
+		UserId:      message.user_id,
+		Ts:          message.ts,
 		MessageData: message_data,
 	})
 	if err != nil {
@@ -54,7 +54,7 @@ func main() {
 	UserId: %v
 	Ts: %v
 	MessageData: %v`, r.GetId(), r.GetUserId(), r.GetTs(), r.GetMessageData())
-	
+
 	start_ts_str := "2021-08-26T09:30:49Z"
 	start_ts, err := time.Parse(time.RFC3339, start_ts_str)
 	if err != nil {
@@ -62,7 +62,7 @@ func main() {
 	}
 	params := &pb.GetMessageParams{
 		StartTs: timestamppb.New(start_ts),
-		EndTs: timestamppb.New(time.Now()),
+		EndTs:   timestamppb.New(time.Now()),
 	}
 	rec, err := c.GetMessages(ctx, params)
 	if err != nil {

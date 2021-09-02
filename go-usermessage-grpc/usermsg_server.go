@@ -10,27 +10,26 @@ import (
 
 	pb "github.com/aeone1/Go/tree/master/go-usermessage-grpc/usermsg"
 	"github.com/jackc/pgx/v4"
+	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"github.com/joho/godotenv"
 )
 
 /*
 TODO: Error handling func and error messages (grpcError)
 */
 
-
 func NewUserMessageServer() *UserMessageServer {
-	return &UserMessageServer{
-	}
+	return &UserMessageServer{}
 }
+
 type UserMessageServer struct {
 	pb.UnimplementedUserMessageServer
 	conn *pgx.Conn
 }
 
 func (server *UserMessageServer) Run() error {
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%s",os.Getenv("GO_PORT")))
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", os.Getenv("GO_PORT")))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -41,13 +40,12 @@ func (server *UserMessageServer) Run() error {
 	return s.Serve(lis)
 }
 
-
 func (server *UserMessageServer) CreateNewMessage(
-	ctx context.Context, 
+	ctx context.Context,
 	in *pb.NewMessage,
-	) (*pb.Message, error) {
+) (*pb.Message, error) {
 	log.Printf("\nRecieved: %v\n", in)
-	
+
 	createSql := `
 	CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 	CREATE TABLE IF NOT EXISTS Messages(
@@ -65,20 +63,20 @@ func (server *UserMessageServer) CreateNewMessage(
 		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		deleted_at TIMESTAMP 
 	);`
-	
+
 	_, err := server.conn.Exec(context.Background(), createSql)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Table creation failed: %v", err)
 		os.Exit(1)
 	}
-	
+
 	created_message_data := &pb.MessageData{
-		Data: in.GetMessageData().Data,
+		Data:    in.GetMessageData().Data,
 		Content: in.GetMessageData().Content,
 	}
 	created_message := &pb.Message{
-		UserId: in.GetUserId(),
-		Ts: in.GetTs(),
+		UserId:      in.GetUserId(),
+		Ts:          in.GetTs(),
 		MessageData: created_message_data,
 	}
 
@@ -92,11 +90,11 @@ func (server *UserMessageServer) CreateNewMessage(
 	values($1, $2) returning id`
 
 	err = tx.QueryRow(
-		context.Background(), 
-		insertMessageSql, 
-		created_message.UserId, 
+		context.Background(),
+		insertMessageSql,
+		created_message.UserId,
 		created_message.Ts.AsTime(),
-		).Scan(&created_message.Id)
+	).Scan(&created_message.Id)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "QueryRow Insert Message failed: %v\n", err)
 		os.Exit(1)
@@ -106,10 +104,10 @@ func (server *UserMessageServer) CreateNewMessage(
 	values($1, $2, $3) returning id`
 
 	err = tx.QueryRow(
-		context.Background(), 
-		insertMessageDataSql, 
-		created_message_data.Data, 
-		created_message.MessageData.Content, 
+		context.Background(),
+		insertMessageDataSql,
+		created_message_data.Data,
+		created_message.MessageData.Content,
 		created_message.Id,
 	).Scan(&created_message_data.Id)
 	if err != nil {
@@ -122,7 +120,7 @@ func (server *UserMessageServer) CreateNewMessage(
 }
 
 func (server *UserMessageServer) GetMessages(
-	ctx context.Context, 
+	ctx context.Context,
 	in *pb.GetMessageParams,
 ) (*pb.MessageList, error) {
 	message_list := &pb.MessageList{}
@@ -152,9 +150,9 @@ func (server *UserMessageServer) GetMessages(
 		message_data := &pb.MessageData{}
 		var ts time.Time
 		err = rows.Scan(
-			&message.Id, 
+			&message.Id,
 			&message.UserId,
-			&ts, 
+			&ts,
 			&message_data.Id,
 			&message_data.Data,
 			&message_data.Content,
@@ -166,9 +164,9 @@ func (server *UserMessageServer) GetMessages(
 		message.Ts = timestamppb.New(ts)
 		message_list.Messages = append(message_list.Messages, message)
 	}
-	
+
 	if rows.Err() != nil {
-    return nil, rows.Err()
+		return nil, rows.Err()
 	}
 
 	return message_list, nil

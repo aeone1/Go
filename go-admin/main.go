@@ -19,20 +19,20 @@ import (
 )
 
 func main() {
- var wg sync.WaitGroup
- wg.Add(1)
+	var wg sync.WaitGroup
+	wg.Add(1)
 
- go func ()  {
-    count("sheep")
-    wg.Done() // reduces wg counter by 1
- }()
+	go func() {
+		count("sheep")
+		wg.Done() // reduces wg counter by 1
+	}()
 
- wg.Wait() // will block till counter is at 0
+	wg.Wait() // will block till counter is at 0
 }
 
 func count(thing string) {
-    for i := 1; i <= 5; i++ {
-        fmt.Println(i, thing)
-        time.Sleep(time.Microsecond * 500)
-    }
+	for i := 1; i <= 5; i++ {
+		fmt.Println(i, thing)
+		time.Sleep(time.Microsecond * 500)
+	}
 }
