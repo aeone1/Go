@@ -19,36 +19,36 @@ func timeTrack(start time.Time, name string) {
 	fmt.Printf("%s took %s\n", name, elapsed)
 }
 
-func main(){
+func main() {
 	defer timeTrack(time.Now(), "SearchRange")
 
-	fmt.Printf("SearchRange([]int{5,7,7,8,8,8,8,9}, 8): %v\n", SearchRange([]int{5,7,7,8,8,8,8,9}, 8)) //[3,4]
-	fmt.Printf("SearchRange([]int{5,7,7,8,8,9}, 6): %v\n", SearchRange([]int{5,7,7,8,8,9}, 6)) //[-1,-1]
+	fmt.Printf("SearchRange([]int{5,7,7,8,8,8,8,9}, 8): %v\n", SearchRange([]int{5, 7, 7, 8, 8, 8, 8, 9}, 8)) //[3,4]
+	fmt.Printf("SearchRange([]int{5,7,7,8,8,9}, 6): %v\n", SearchRange([]int{5, 7, 7, 8, 8, 9}, 6))           //[-1,-1]
 
 }
 
-func SearchRange(nums []int, target int ) []int {
+func SearchRange(nums []int, target int) []int {
 	result := make([]int, 2)
 	result[0] = FindStartingIndex(nums, target)
 	result[1] = FindEndingIndex(nums, target)
 	return result
 }
 
-func FindStartingIndex(nums []int, target int ) int {
+func FindStartingIndex(nums []int, target int) int {
 	//fmt.Print("\n--FindStartingIndex--\n")
 	index := -1
 	start := 0
-	end := len(nums)-1
+	end := len(nums) - 1
 
 	//fmt.Printf("start: %v, end: %v \n", start, end)
 
 	for start <= end {
-		midpoint := start + (end-start) / 2 // avoids integer overflow
+		midpoint := start + (end-start)/2 // avoids integer overflow
 		//fmt.Printf("start: %v, end: %v, midpoint: %v\nnums[midpoint]: %v\n", start, end, midpoint, nums[midpoint])
 		if nums[midpoint] >= target {
-			end = midpoint-1 
+			end = midpoint - 1
 		} else {
-			start = midpoint+1
+			start = midpoint + 1
 		}
 		if nums[midpoint] == target {
 			index = midpoint
@@ -58,11 +58,11 @@ func FindStartingIndex(nums []int, target int ) int {
 	return index
 }
 
-func FindEndingIndex(nums []int, target int ) int {
+func FindEndingIndex(nums []int, target int) int {
 	//fmt.Print("\n--FindEndingIndex--\n")
 	index := -1
 	start := 0
-	end := len(nums)-1
+	end := len(nums) - 1
 
 	//fmt.Printf("start: %v, end: %v \n", start, end)
 
@@ -70,9 +70,9 @@ func FindEndingIndex(nums []int, target int ) int {
 		midpoint := start + (end-start)/2
 		//fmt.Printf("start: %v, end: %v, midpoint: %v\nnums[midpoint]: %v\n", start, end, midpoint, nums[midpoint])
 		if nums[midpoint] <= target {
-			start = midpoint+1
+			start = midpoint + 1
 		} else {
-			end = midpoint-1
+			end = midpoint - 1
 		}
 		if nums[midpoint] == target {
 			index = midpoint
