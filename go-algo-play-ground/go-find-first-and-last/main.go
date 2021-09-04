@@ -22,7 +22,7 @@ func timeTrack(start time.Time, name string) {
 func main(){
 	defer timeTrack(time.Now(), "SearchRange")
 
-	fmt.Printf("SearchRange([]int{5,7,7,8,8,9}, 8): %v\n", SearchRange([]int{5,7,7,8,8,9}, 8)) //[3,4]
+	fmt.Printf("SearchRange([]int{5,7,7,8,8,8,8,9}, 8): %v\n", SearchRange([]int{5,7,7,8,8,8,8,9}, 8)) //[3,4]
 	fmt.Printf("SearchRange([]int{5,7,7,8,8,9}, 6): %v\n", SearchRange([]int{5,7,7,8,8,9}, 6)) //[-1,-1]
 
 }
@@ -35,12 +35,16 @@ func SearchRange(nums []int, target int ) []int {
 }
 
 func FindStartingIndex(nums []int, target int ) int {
+	//fmt.Print("\n--FindStartingIndex--\n")
 	index := -1
 	start := 0
 	end := len(nums)-1
 
+	//fmt.Printf("start: %v, end: %v \n", start, end)
+
 	for start <= end {
-		midpoint := start + (end-start) / 2 // avoids overflow(?)
+		midpoint := start + (end-start) / 2 // avoids integer overflow
+		//fmt.Printf("start: %v, end: %v, midpoint: %v\nnums[midpoint]: %v\n", start, end, midpoint, nums[midpoint])
 		if nums[midpoint] >= target {
 			end = midpoint-1 
 		} else {
@@ -55,12 +59,16 @@ func FindStartingIndex(nums []int, target int ) int {
 }
 
 func FindEndingIndex(nums []int, target int ) int {
+	//fmt.Print("\n--FindEndingIndex--\n")
 	index := -1
 	start := 0
 	end := len(nums)-1
 
+	//fmt.Printf("start: %v, end: %v \n", start, end)
+
 	for start <= end {
 		midpoint := start + (end-start)/2
+		//fmt.Printf("start: %v, end: %v, midpoint: %v\nnums[midpoint]: %v\n", start, end, midpoint, nums[midpoint])
 		if nums[midpoint] <= target {
 			start = midpoint+1
 		} else {
