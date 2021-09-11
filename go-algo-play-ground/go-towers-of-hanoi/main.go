@@ -21,7 +21,8 @@ func TowersOfHanoi(n int, start int, end int) {
 	if n == 1 {
 		PrintMove(start, end)
 	} else {
-		other := 6 - (start + end)
+		other := 6 - (start + end) // give the location of the other pole
+		// 6 because 1 + 2 + 3 = 6 ie the pole numbers
 		TowersOfHanoi(n - 1, start, other)
 		PrintMove(start, end)
 		TowersOfHanoi(n - 1, other, end)
